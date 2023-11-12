@@ -8,7 +8,7 @@ pinned: false
 license: agpl-3.0
 app_port: 3000
 ---
-<h1 align="center">Next.js on 🤗 Spaces</h1>
+<h1 align="center">HERE.CHAT</h1>
 
 <p align="center">
 Run your ML demo with ease in a <a href="https://nextjs.org">Next.js</a> environment
