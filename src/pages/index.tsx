@@ -31,7 +31,7 @@ export default function Home() {
           <div className="flex gap-2">
             <div className="">
               <Input type='file' onChange={handleFileChange}/>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">TXT, DOCX, PPTX, JPG, PNG, HTML or PDF .</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">TXT, DOCX, PPTX, JPG, PNG, HTML or PDF</p>
             </div>
             <Button className='border-2 border-blue-500 bg-white text-blue-500 font-bold hover:text-white hover:bg-blue-500'>Submit</Button>
           </div>
