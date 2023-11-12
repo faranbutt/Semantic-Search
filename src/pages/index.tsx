@@ -16,7 +16,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="Semantic Search with Cohere 🗣️" />
       </Head>
-      <div className="w-screen h-screen border-[20px] border-blue-500 border-xl p-7">
+      <div className="">
       <div className=''>
       <div className='flex justify-end m-10'>
         <div className='bg-blue-500 text-sm rounded-xl text-white px-4 py-2'>
