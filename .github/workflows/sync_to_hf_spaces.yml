@@ -19,4 +19,5 @@ jobs:
       - name: Push to Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://$faranbutt789:$HF_TOKEN@huggingface.co/spaces/$faranbutt789TeamTonic/Semantic-Search main
+          HF_USERNAME: faranbutt789
+        run: git push --force https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/TeamTonic/Semantic-Search main
