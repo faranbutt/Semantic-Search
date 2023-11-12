@@ -1,3 +1,4 @@
+import './global.css'
 import Head from "next/head";
 import { AppProps } from "next/app";
 import { Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material/styles";
