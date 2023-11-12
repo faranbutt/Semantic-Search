@@ -1,8 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
-import { Input } from "@mui/material";
-import Button from "@mui/material";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 export default function Home() {
   const [file,setFile] = useState(null);
   const [result,setResult] = useState('');
@@ -28,11 +28,12 @@ export default function Home() {
           <h1 className='text-gray-400 text-5xl md:text-7xl font-bold'>Here <span className='text-blue-600 dark:text-blue-500'> .Chat</span></h1>
         </div>
         <div className=''>
-          <div className="">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload file</label>
-            <input className="p-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help" id="file_input" type="file"/>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
-              
+          <div className="flex gap-2">
+            <div className="">
+              <Input type='file' onChange={handleFileChange}/>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
+            </div>
+            <Button className='border-2 border-blue-500 bg-white text-blue-500 font-bold hover:text-white hover:bg-blue-500'>Submit</Button>
           </div>
         </div>
       </div>
