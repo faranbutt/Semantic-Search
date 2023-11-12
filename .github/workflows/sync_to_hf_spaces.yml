@@ -20,4 +20,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: faranbutt789
-        run: git push --force https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/TeamTonic/Semantic-Search
+        run: git push --force https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/TeamTonic/here.chat
