@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 export default function Home() {
   const [file,setFile] = useState(null);
   const [result,setResult] = useState('');
