@@ -10,7 +10,7 @@ export default function Document() {
       <body className='w-screen h-screen border-[20px] border-blue-500 border-xl p-0'>
         <Main />
         <NextScript />
-        <div className='mt-[80px] flex items-end justify-end pr-10'>
+        <div className='mt-[77px] flex items-end justify-end pr-10'>
           <div>
             <div className='flex gap-2'>
               <Link href={'https://huggingface.co/Tonic'}><Image src={'/tonic.webp'} alt='tonic' width={70} height={70} className='rounded-full'/></Link>
