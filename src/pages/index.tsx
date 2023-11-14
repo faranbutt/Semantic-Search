@@ -25,9 +25,11 @@ export default function Home() {
         </div>
       </div>
       <div className='flex flex-col gap-10 justify-center items-center pt-10 h-full mx-auto'>
-        <div className='flex'>
+        <div className='flex flex-col'>
           <h1 className='text-gray-400 text-5xl md:text-7xl font-bold'>Here <span className='text-blue-600 dark:text-blue-500'> .Chat</span></h1>
+          <h2 className="text-sm">Semantic Search your document in over 100 languages</h2>
         </div>
+      
         <div className=''>
           <div className="flex gap-2">
             <div className="">
