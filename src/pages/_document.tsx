@@ -13,9 +13,9 @@ export default function Document() {
         <div className='mt-[75px] flex items-end justify-end pr-10'>
           <div>
             <div className='flex gap-2'>
-              <Link href={'https://huggingface.co/Tonic'}><Image src={'/tonic.webp'} alt='tonic' width={70} height={70} className='rounded-full'/></Link>
-              <Link href={'https://www.linkedin.com/in/faranbutt/'}><Image src={'/faran.jpg'} alt='tonic' width={70} height={70} className='rounded-full'/></Link>
-              <Link href={'https://www.github.com/Hassanmustafa786'}><Image src={'/mustafa.webp'} alt='tonic' width={70} height={70} className='rounded-full'/></Link>
+              <Link href={'https://huggingface.co/Tonic'}><Image src={'/tonic.webp'} alt='tonic' width={70} height={70} className='rounded-full border-8 border-blue-500'/></Link>
+              <Link href={'https://www.linkedin.com/in/faranbutt/'}><Image src={'/faran.jpg'} alt='tonic' width={70} height={70} className='rounded-full border-8 border-blue-500'/></Link>
+              <Link href={'https://www.github.com/Hassanmustafa786'}><Image src={'/mustafa.webp'} alt='tonic' width={70} height={70} className='rounded-full border-8 border-blue-500'/></Link>
             
             </div>
           </div>
