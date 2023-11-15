@@ -69,14 +69,49 @@ Article = {
 #  "vectorizer": "text2vec-contextionary"
 }
 
+# Function to check if a class exists in the schema
+def class_exists(class_name):
+    try:
+        existing_schema = client.schema.get()
+        existing_classes = [cls["class"] for cls in existing_schema["classes"]]
+        return class_name in existing_classes
+    except Exception as e:
+        print(f"Error checking if class exists: {e}")
+        return False
 
+# Check if 'Article' class already exists
+if not class_exists("Article"):
+    # Create the schema if 'Article' class does not exist
+    try:
+        client.schema.create(schema)
+    except Exception as e:
+        print(f"Error creating schema: {e}")
+else:
+    print("Class 'Article' already exists in the schema.")
+
+# Initialize the schema
 schema = {
     "classes": [Article]
 }
 
+# Check if 'Article' class already exists
+if not class_exists("Article"):
+    # Create the schema if 'Article' class does not exist
+    try:
+        client.schema.create(schema)
+    except Exception as e:
+        print(f"Error creating schema: {e}")
+else:
+    # Retrieve the existing schema if 'Article' class exists
+    try:
+        existing_schema = client.schema.get()
+        print("Existing schema retrieved:", existing_schema)
+    except Exception as e:
+        print(f"Error retrieving existing schema: {e}")
+        
+
 # Initialize vectorstore
 vectorstore = Weaviate(client, index_name="HereChat", text_key="text")
-client.schema.create(schema)
 vectorstore._query_attrs = ["text", "title", "url", "views", "lang", "_additional {distance}"]
 vectorstore.embedding = CohereEmbeddings(model="embed-multilingual-v2.0", cohere_api_key=cohere_api_key)
 
@@ -87,8 +122,16 @@ def embed_pdf(file, collection_name):
     # Save the uploaded file
     filename = file.name
     file_path = os.path.join('./', filename)
+
+    # Check if the file object has 'read' method
+    if hasattr(file, 'read'):
+        file_content = file.read()
+    else:
+        # Handle the case where 'read' method is not available
+        file_content = file.getvalue()  # Assuming it's a NamedString or similar object
+
     with open(file_path, 'wb') as f:
-        f.write(file.read())
+        f.write(file_content)
 
     # Checking filetype for document parsing
     mime_type = mimetypes.guess_type(file_path)[0]
@@ -121,13 +164,15 @@ def retrieve_info(query):
     # Rerank the top results
     reranked_results = co.rerank(query=query, documents=top_docs, top_n=3, model='rerank-english-v2.0')
 
-    # Format the reranked results
+    # Format the reranked results according to the Article schema
     formatted_results = []
     for idx, r in enumerate(reranked_results):
         formatted_result = {
             "Document Rank": idx + 1,
-            "Document Index": r.index,
-            "Document": r.document['text'],
+            "Title": r.document['title'],  
+            "Content": r.document['content'],  
+            "Author": r.document['author'],  
+            "Publish Date": r.document['publishDate'],  
             "Relevance Score": f"{r.relevance_score:.2f}"
         }
         formatted_results.append(formatted_result)
@@ -162,11 +207,13 @@ def retrieve_info(query):
 
 def combined_interface(query, file, collection_name):
     if query:
-        return retrieve_info(query)
+        article_info = retrieve_info(query)
+        return article_info
     elif file is not None and collection_name:
         return embed_pdf(file, collection_name)
     else:
         return "Please enter a query or upload a PDF file."
+
 
 iface = gr.Interface(
     fn=combined_interface,
