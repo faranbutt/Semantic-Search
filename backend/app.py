@@ -1,9 +1,8 @@
 import weaviate
 import langchain
+import apscheduler
 import gradio as gr
 from langchain.embeddings import CohereEmbeddings
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts.prompt import PromptTemplate
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.vectorstores import Weaviate
 from langchain.llms import OpenAI
@@ -14,6 +13,8 @@ import ssl
 import mimetypes
 from dotenv import load_dotenv
 import cohere
+from apscheduler.schedulers.background import BackgroundScheduler
+import time
 
 # Load environment variables
 load_dotenv()
@@ -21,56 +22,61 @@ openai_api_key = os.getenv('OPENAI')
 cohere_api_key = os.getenv('COHERE')
 weaviate_api_key = os.getenv('WEAVIATE')
 weaviate_url = os.getenv('WEAVIATE_URL')
+weaviate_username = os.getenv('WEAVIATE_USERNAME')
+weaviate_password = os.getenv('WEAVIATE_PASSWORD')
 
-# Define your prompt templates
-prompt_template = """
-your preferred texts.
 
-{context}
+# Function to refresh authentication
+def refresh_authentication():
+    global my_credentials, client
+    my_credentials = weaviate.auth.AuthClientPassword(username=weaviate_username, password=weaviate_password)
+    client = weaviate.Client(weaviate_url, auth_client_secret=my_credentials)
 
-{chat_history}
-Human: {human_input}
-Chatbot:
-"""
+# Initialize the scheduler for authentication refresh
+scheduler = BackgroundScheduler()
+scheduler.add_job(refresh_authentication, 'interval', minutes=30)
+scheduler.start()
 
-summary_prompt_template = """
-Current summary:
-{summary}
+# Initial authentication
+refresh_authentication()
 
-new lines of conversation:
-{new_lines}
+Article = {
+  "class": "Article",
+  "description": "A class representing articles in the application",
+  "properties": [
+    {
+      "name": "title",
+      "description": "The title of the article",
+      "dataType": ["text"]
+    },
+    {
+      "name": "content",
+      "description": "The content of the article",
+      "dataType": ["text"]
+    },
+    {
+      "name": "author",
+      "description": "The author of the article",
+      "dataType": ["text"]
+    },
+    {
+      "name": "publishDate",
+      "description": "The date the article was published",
+      "dataType": ["date"]
+    }
+  ],
+#  "vectorIndexType": "hnsw",
+#  "vectorizer": "text2vec-contextionary"
+}
 
-New summary:
-"""
 
-# Initialize chat history
-chat_history = ChatMessageHistory.construct()
-
-# Create prompt templates
-summary_prompt = PromptTemplate(input_variables=["summary", "new_lines"], template=summary_prompt_template)
-load_qa_chain_prompt = PromptTemplate(input_variables=["chat_history", "human_input", "context"], template=prompt_template)
-
-# Initialize memory
-memory = ConversationSummaryBufferMemory(
-    llm="your llm",
-    memory_key="chat_history",
-    input_key="human_input",
-    max_token=5000,
-    prompt=summary_prompt,
-    moving_summary_buffer="summary",
-    chat_memory=chat_history
-)
-
-# Load QA chain with memory
-qa_chain = load_qa_chain(llm="your llm", chain_type="stuff", memory=memory, prompt=load_qa_chain_prompt)
-
-# Weaviate connection
-auth_config = weaviate.auth.AuthApiKey(api_key=weaviate_api_key)
-client = weaviate.Client(url=weaviate_url, auth_client_secret=auth_config, 
-                         additional_headers={"X-Cohere-Api-Key": cohere_api_key})
+schema = {
+    "classes": [Article]
+}
 
 # Initialize vectorstore
 vectorstore = Weaviate(client, index_name="HereChat", text_key="text")
+client.schema.create(schema)
 vectorstore._query_attrs = ["text", "title", "url", "views", "lang", "_additional {distance}"]
 vectorstore.embedding = CohereEmbeddings(model="embed-multilingual-v2.0", cohere_api_key=cohere_api_key)
 
@@ -102,15 +108,7 @@ def embed_pdf(file, collection_name):
     os.remove(file_path)
     return {"message": f"Documents embedded in Weaviate collection '{collection_name}'"}
 
-def update_chat_history(user_message, ai_message):
-    chat_history.add_user_message(user_message)
-    chat_history.add_ai_message(ai_message)
-    # Update memory if needed
-    if len(chat_history) > memory.max_token:
-        memory.create_summary()
-
 def retrieve_info(query):
-    update_chat_history(query, "")
     llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
     qa = RetrievalQA.from_chain_type(llm, retriever=vectorstore.as_retriever())
     
