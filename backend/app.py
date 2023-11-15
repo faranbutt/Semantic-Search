@@ -118,19 +118,30 @@ vectorstore.embedding = CohereEmbeddings(model="embed-multilingual-v2.0", cohere
 # Initialize Cohere client
 co = cohere.Client(api_key=cohere_api_key)
 
-def embed_pdf(file, filename, collection_name):
-    # Check if the input is a filepath (str) or binary (bytes)
-    if isinstance(file, str):  # filepath
-        file_path = file
-        with open(file_path, 'rb') as f:
-            file_content = f.read()
-    elif isinstance(file, bytes):  # binary
+def embed_pdf(file, filename, collection_name, file_type):
+    # Check the file type and handle accordingly
+    if file_type == "URL":
+        # Download the file from the URL
+        try:
+            context = ssl._create_unverified_context()
+            with urllib.request.urlopen(file, context=context) as response, open(filename, 'wb') as out_file:
+                data = response.read()
+                out_file.write(data)
+            file_path = filename
+        except Exception as e:
+            return {"error": f"Error downloading file from URL: {e}"}
+    elif file_type == "Binary":
+        # Handle binary file
+        if isinstance(file, str):
+            # Convert string to bytes if necessary
+            file = file.encode()
         file_content = file
         file_path = os.path.join('./', filename)
         with open(file_path, 'wb') as f:
             f.write(file_content)
     else:
-        return {"error": "Invalid file format"}
+        return {"error": "Invalid file type"}
+
 
     # Checking filetype for document parsing
     mime_type = mimetypes.guess_type(file_path)[0]
@@ -206,14 +217,35 @@ def retrieve_info(query):
 
     return final_response.choices[0].text
 
-def combined_interface(query, file, filename, collection_name):
+def combined_interface(query, file, collection_name):
     if query:
         article_info = retrieve_info(query)
         return article_info
-    elif file is not None and filename and collection_name:
-        return embed_pdf(file, filename, collection_name)
+    elif file is not None and collection_name:
+        filename = file[1]  # Extract filename
+        file_content = file[0]  # Extract file content
+
+        # Check if file_content is a URL or binary data
+        if isinstance(file_content, str) and file_content.startswith("http"):
+            file_type = "URL"
+            # Handle URL case (if needed)
+        else:
+            file_type = "Binary"
+            # Write binary data to a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as temp_file:
+                temp_file.write(file_content)
+                temp_filepath = temp_file.name
+
+            # Pass the file path to embed_pdf
+            result = embed_pdf(temp_filepath, collection_name)
+
+            # Clean up the temporary file
+            os.remove(temp_filepath)
+
+            return result
     else:
         return "Please enter a query or upload a PDF file and specify a collection name."
+
 
 iface = gr.Interface(
     fn=combined_interface,
