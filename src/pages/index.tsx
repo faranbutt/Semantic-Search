@@ -9,7 +9,7 @@ import axios from "axios";
 import React from "react";
 export default function Home() {
   const inputFileRef = React.createRef();
-  const [file,setFile] = useState(null);
+  const [file,setFile] = useState('');
   const [result,setResult] = useState('');
   const [query,setQuery] = useState('');
   const [collection,setCollection] = useState('');
