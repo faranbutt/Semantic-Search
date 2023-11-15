@@ -118,20 +118,19 @@ vectorstore.embedding = CohereEmbeddings(model="embed-multilingual-v2.0", cohere
 # Initialize Cohere client
 co = cohere.Client(api_key=cohere_api_key)
 
-def embed_pdf(file, collection_name):
-    # Save the uploaded file
-    filename = file.name
-    file_path = os.path.join('./', filename)
-
-    # Check if the file object has 'read' method
-    if hasattr(file, 'read'):
-        file_content = file.read()
+def embed_pdf(file, filename, collection_name):
+    # Check if the input is a filepath (str) or binary (bytes)
+    if isinstance(file, str):  # filepath
+        file_path = file
+        with open(file_path, 'rb') as f:
+            file_content = f.read()
+    elif isinstance(file, bytes):  # binary
+        file_content = file
+        file_path = os.path.join('./', filename)
+        with open(file_path, 'wb') as f:
+            f.write(file_content)
     else:
-        # Handle the case where 'read' method is not available
-        file_content = file  
-
-    with open(file_path, 'wb') as f:
-        f.write(file_content)
+        return {"error": "Invalid file format"}
 
     # Checking filetype for document parsing
     mime_type = mimetypes.guess_type(file_path)[0]
@@ -148,9 +147,11 @@ def embed_pdf(file, collection_name):
         }
         client.data_object.create(data_object=weaviate_document, class_name=collection_name)
 
-    os.remove(file_path)
+    # Clean up if a temporary file was created
+    if isinstance(file, bytes):
+        os.remove(file_path)
     return {"message": f"Documents embedded in Weaviate collection '{collection_name}'"}
-    
+
 def retrieve_info(query):
     llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
     qa = RetrievalQA.from_chain_type(llm, retriever=vectorstore.as_retriever())
@@ -205,15 +206,14 @@ def retrieve_info(query):
 
     return final_response.choices[0].text
 
-def combined_interface(query, file, collection_name):
+def combined_interface(query, file, filename, collection_name):
     if query:
         article_info = retrieve_info(query)
         return article_info
-    elif file is not None and collection_name:
-        return embed_pdf(file, collection_name)
+    elif file is not None and filename and collection_name:
+        return embed_pdf(file, filename, collection_name)
     else:
-        return "Please enter a query or upload a PDF file."
-
+        return "Please enter a query or upload a PDF file and specify a collection name."
 
 iface = gr.Interface(
     fn=combined_interface,
