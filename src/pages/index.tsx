@@ -82,7 +82,7 @@ export default function Home() {
               </div>
               <div>
                 <label htmlFor="" className="font-bold text-3xl">Enter Document</label>
-                <Input type='file' ref={inputFileRef} onChange={handleFileChange}/>
+                <Input type='file' onChange={handleFileChange}/>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">TXT, DOCX, PPTX, JPG, PNG, HTML or PDF</p>
               </div>
               <div>
