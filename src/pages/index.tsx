@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { client } from "@gradio/client";
+import axios from "axios";
 export default function Home() {
   const [file,setFile] = useState(null);
   const [result,setResult] = useState('');
@@ -13,20 +14,23 @@ export default function Home() {
   
   const handleFileChange = (event:any) => {
     console.log(event.target.files[0])
-    setFile(event.target.files[0]);
+    setFile(event.target.files[0].name);
   }
   const SendFile = async() => {
-    console.log("File Recieved",file)
-    console.log("Query Recieved",query)
-    console.log("Collection Recieved",collection)
+    console.log("File Recieved: ",file)
+    console.log("Query Recieved: ",query)
+    console.log("Collection Recieved: ",collection)
     try{
-      //const app  = await client('https://teamtonic-herechatbackend.hf.space/--replicas/jfflh/',{hf_token:'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'});
-//       const result:any = await app.predict("/predict", [		
-// 				"Hello!!", // string  in 'Query' Textbox component
-// 				file, 	// blob in 'PDF File' File component		
-// 				"Hello!!", // string  in 'Collection Name' Textbox component
-// 	     ]);
-// console.log(result.data);
+      const url = 'https://teamtonic-herechatbackend.hf.space/combined_interface';
+      const data = {
+        data: [query, file, collection]
+      };
+     const response = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
     }catch(error){
       console.error('Error:', error);
     }
