@@ -128,7 +128,7 @@ def embed_pdf(file, collection_name):
         file_content = file.read()
     else:
         # Handle the case where 'read' method is not available
-        file_content = file.getvalue()  # Assuming it's a NamedString or similar object
+        file_content = file  
 
     with open(file_path, 'wb') as f:
         f.write(file_content)
@@ -150,7 +150,7 @@ def embed_pdf(file, collection_name):
 
     os.remove(file_path)
     return {"message": f"Documents embedded in Weaviate collection '{collection_name}'"}
-
+    
 def retrieve_info(query):
     llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
     qa = RetrievalQA.from_chain_type(llm, retriever=vectorstore.as_retriever())
