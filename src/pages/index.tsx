@@ -6,30 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { client } from "@gradio/client";
 import axios from "axios";
+import React from "react";
 export default function Home() {
+  const inputFileRef = React.createRef();
   const [file,setFile] = useState(null);
   const [result,setResult] = useState('');
   const [query,setQuery] = useState('');
   const [collection,setCollection] = useState('');
-  
+  const formData = new FormData();
   const handleFileChange = (event:any) => {
-    console.log(event.target.files[0])
-    setFile(event.target.files[0].name);
+    // console.log(event.target.files[0])
+    setFile(event.target.files[0]);
+    // const inputFile:any = inputFileRef.current;
+    // const exampleFile = inputFile.files[0];
+    // formData.append("pdfFile", exampleFile);
+    // console.log(formData)
+    
   }
   const SendFile = async() => {
     console.log("File Recieved: ",file)
     console.log("Query Recieved: ",query)
     console.log("Collection Recieved: ",collection)
+    formData.append('query', query);
+    formData.append('pdf_file', file);
+    formData.append('collection_name', collection);
+    console.log("FORM",formData)
     try{
-      const url = 'https://teamtonic-herechatbackend.hf.space/combined_interface';
-      const data = {
-        data: [query, file, collection]
-      };
-     const response = await axios.post(url, data, {
+    //   const url = 'https://teamtonic-herechatbackend.hf.space/--replicas/djdp8/';
+    //   const data = {
+    //     data: [query, formData, collection]
+    //   };
+    //  const response = await axios.post(url, data.data, {
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     }
+    //   })
+    const response = await axios.post('https://teamtonic-herechatbackend.hf.space/--replicas/djdp8/combined_interface', formData, {
         headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const responseData = response.data;
       console.log(response)
     }catch(error){
       console.error('Error:', error);
@@ -65,7 +82,7 @@ export default function Home() {
               </div>
               <div>
                 <label htmlFor="" className="font-bold text-3xl">Enter Document</label>
-                <Input type='file' onChange={handleFileChange}/>
+                <Input type='file' ref={inputFileRef} onChange={handleFileChange}/>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">TXT, DOCX, PPTX, JPG, PNG, HTML or PDF</p>
               </div>
               <div>
