@@ -1,6 +1,7 @@
 import weaviate
 import langchain
 import apscheduler
+import tempfile
 import gradio as gr
 from langchain.embeddings import CohereEmbeddings
 from langchain.document_loaders import UnstructuredFileLoader
